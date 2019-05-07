@@ -1,7 +1,8 @@
 """
 Models for configuring waffle utils.
 """
-from django.db.models import CharField
+from django.db import models
+from django.db.models import CharField, IntegerField, BooleanField
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from opaque_keys.edx.django.models import CourseKeyField
