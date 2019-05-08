@@ -27,12 +27,8 @@ try:
     from urllib import urlencode
     import urlparse
 except ImportError:
-    from urllib.parse import urlencode
+    from urllib.parse import urlencode   # pylint: disable=ungrouped-imports
     import urllib.parse as urlparse
-
-
-
-
 
 log = logging.getLogger("edx.footer")
 EMPTY_URL = '#'
