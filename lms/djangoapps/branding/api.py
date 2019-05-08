@@ -13,13 +13,6 @@ the marketing site and blog).
 
 """
 import logging
-try:
-    from urllib import urlencode
-    import urlparse
-except ImportError:
-    from urllib.parse import urlencode
-    import urllib.parse as urlparse
-
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -28,8 +21,18 @@ from django.utils.translation import ugettext as _
 
 from branding.models import BrandingApiConfig
 from edxmako.shortcuts import marketing_link
-
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+
+try:
+    from urllib import urlencode
+    import urlparse
+except ImportError:
+    from urllib.parse import urlencode
+    import urllib.parse as urlparse
+
+
+
+
 
 log = logging.getLogger("edx.footer")
 EMPTY_URL = '#'

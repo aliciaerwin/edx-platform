@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from branding.api import get_footer, get_home_url, get_logo_url
+from branding.api import _footer_business_links, get_footer, get_home_url, get_logo_url
 from edxmako.shortcuts import marketing_link
 
 from openedx.core.djangoapps.site_configuration.tests.test_util import (
@@ -57,11 +57,23 @@ class TestHeader(TestCase):
 class TestFooter(TestCase):
     maxDiff = None
     """Test retrieving the footer. """
-    @mock.patch.dict('django.conf.settings.ENTERPRISE_MARKETING_FOOTER_QUERY_PARAMS', OrderedDict([
-        ("utm_campaign", "edX.org Referral"),
-        ("utm_source", "edX.org"),
-        ("utm_medium", "Footer"),
-    ]))
+
+    @mock.patch.dict('django.conf.settings.FEATURES', {'ENABLE_MKTG_SITE': True})
+    @mock.patch.dict('django.conf.settings.MKTG_URLS', {
+        "ROOT": "https://edx.org",
+        "ENTERPRISE": "/enterprise"
+    })
+    @override_settings(ENTERPRISE_MARKETING_FOOTER_QUERY_PARAMS={}, PLATFORM_NAME='\xe9dX')
+    def test_footer_business_links_no_marketing_query_params(self):
+        """
+        Enterprise marketing page values returned should be a concatenation of ROOT and
+        ENTERPRISE marketing url values when ENTERPRISE_MARKETING_FOOTER_QUERY_PARAMS
+        is not set.
+        """
+
+        business_links = _footer_business_links()
+        assert business_links[0]['url'] == 'https://edx.org/enterprise'
+
     @mock.patch.dict('django.conf.settings.FEATURES', {'ENABLE_MKTG_SITE': True})
     @mock.patch.dict('django.conf.settings.MKTG_URLS', {
         "ROOT": "https://edx.org",
@@ -85,6 +97,7 @@ class TestFooter(TestCase):
     @override_settings(PLATFORM_NAME='\xe9dX')
     def test_get_footer(self):
         actual_footer = get_footer(is_secure=True)
+        business_url = 'https://business.edx.org/?utm_campaign=edX.org+Referral&utm_source=edX.org&utm_medium=Footer'
         expected_footer = {
             'copyright': '\xa9 \xe9dX.  All rights reserved except where noted. '
                          ' EdX, Open edX and their respective logos are '
@@ -101,7 +114,7 @@ class TestFooter(TestCase):
             ],
             'business_links': [
                 {'url': 'https://edx.org/about-us', 'name': 'about', 'title': 'About'},
-                {'url': 'https://business.edx.org/?utm_campaign=edX.org+Referral&utm_source=edX.org&utm_medium=Footer', 'name': 'enterprise', 'title': '\xe9dX for Business'},
+                {'url': business_url, 'name': 'enterprise', 'title': '\xe9dX for Business'},
                 {'url': 'https://edx.org/affiliate-program', 'name': 'affiliates', 'title': 'Affiliates'},
                 {'url': 'http://open.edx.org', 'name': 'openedx', 'title': 'Open edX'},
                 {'url': 'https://edx.org/careers', 'name': 'careers', 'title': 'Careers'},
